@@ -1,9 +1,9 @@
-GPIO_PORT = 18
-SENSOR = Adafruit_DHT.DHT11
-
 import sys
 import time
 import Adafruit_DHT
+
+GPIO_PORT = 18
+SENSOR = Adafruit_DHT.DHT11
 
 while True:
     humidity, temperature = Adafruit_DHT.read_retry(SENSOR, GPIO_PORT)
