@@ -7,7 +7,7 @@ SENSOR = Adafruit_DHT.DHT11
 
 while True:
     humidity, temperature = Adafruit_DHT.read_retry(SENSOR, GPIO_PORT)
-    temperature *= 9/5.0 + 32
-    print("Temperature: ", temperature, " deg F, Humidity: ", humidity, " %")
+    temperature = temperature * 9 / 5.0 + 32
+    print "Temperature: %.2f deg F, Humidity: %d" % (temperature, humidity)
     time.sleep(2)
 
