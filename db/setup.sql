@@ -1,0 +1,7 @@
+CREATE TABLE Data (
+	id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	created_at DATETIME NOT NULL,
+	temp_f FLOAT NOT NULL,
+	temp_c FLOAT NOT NULL,
+	humidity FLOAT
+);

@@ -1,0 +1,1 @@
+DELECT COUNT(*) FROM Data;
