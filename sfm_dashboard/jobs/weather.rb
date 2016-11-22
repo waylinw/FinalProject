@@ -8,7 +8,6 @@ UNITS   = 'metric'
 
 # create free account on open weather map to get API key
 API_KEY = ENV['WEATHER_KEY']
-print API_KEY
 
 SCHEDULER.every '20s', :first_in => 0 do |job|
 

@@ -102,6 +102,3 @@ DEPENDENCIES
   dashing
   twitter (>= 5.9.0)
   xml-simple
-
-BUNDLED WITH
-   1.13.6
