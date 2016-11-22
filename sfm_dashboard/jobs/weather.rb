@@ -1,125 +1,68 @@
 require 'net/http'
-require 'xmlsimple'
- 
-# Get a WOEID (Where On Earth ID)
-# for your location from here:
-# http://woeid.rosselliot.co.nz/
-woe_id = 12796844 # San Luis Obispo, CA
- 
-# Temerature format:
-# 'c' for Celcius
-# 'f' for Fahrenheit
-format = 'c'
- 
-SCHEDULER.every '1s', :first_in => 0 do |job|
-  http = Net::HTTP.new('weather.yahooapis.com')
-  response = http.request(Net::HTTP::Get.new("/forecastrss?w=#{woe_id}&u=#{format}"))
-  weather_data = XmlSimple.xml_in(response.body, { 'ForceArray' => false })['channel']['item']['condition']
-  weather_location = XmlSimple.xml_in(response.body, { 'ForceArray' => false })['channel']['location']
-  send_event('weather', { :temp => "#{weather_data['temp']}&deg;#{format.upcase}",
-                          :condition => weather_data['text'],
-                          :title => "#{weather_location['city']} Weather",
-                          :climacon => climacon_class(weather_data['code'])})
+
+# you can find CITY_ID here http://bulk.openweathermap.org/sample/city.list.json.gz
+CITY_ID = 12796844 # San Luis Obispo, CA
+
+# options: metric / imperial
+UNITS   = 'metric'
+
+# create free account on open weather map to get API key
+API_KEY = ENV['WEATHER_KEY']
+
+SCHEDULER.every '10s', :first_in => 0 do |job|
+
+  http = Net::HTTP.new('api.openweathermap.org')
+  response = http.request(Net::HTTP::Get.new("/data/2.5/weather?id=#{CITY_ID}&units=#{UNITS}&appid=#{API_KEY}"))
+
+  next unless '200'.eql? response.code
+
+  weather_data  = JSON.parse(response.body)
+  detailed_info = weather_data['weather'].first
+  current_temp  = weather_data['main']['temp'].to_f.round
+
+  send_event('weather', { :temp => "#{current_temp} &deg;#{temperature_units}",
+                          :condition => detailed_info['main'],
+                          :title => "#{weather_data['name']} Weather",
+                          :color => color_temperature(current_temp),
+                          :climacon => climacon_class(detailed_info['id'])})
 end
 
 
+def temperature_units
+  'metric'.eql?(UNITS) ? 'C' : 'K'
+end
+
+def color_temperature(temp_celsius)
+  case temp_celsius.to_i
+  when 30..100
+    '#FF3300'
+  when 25..29
+    '#FF6000'
+  when 19..24
+    '#FF9D00'
+  when 5..18
+    '#18A9FF'
+  else
+    '#0065FF'
+  end
+end
+
+# fun times ;) legend: http://openweathermap.org/weather-conditions
 def climacon_class(weather_code)
-  case weather_code.to_i
-  when 0 
-    'tornado'
-  when 1 
-    'tornado'
-  when 2 
-    'tornado'
-  when 3 
-    'lightning'
-  when 4 
-    'lightning'
-  when 5 
-    'snow'
-  when 6 
-    'sleet'
-  when 7 
-    'snow'
-  when 8 
-    'drizzle'
-  when 9 
-    'drizzle'
-  when 10 
-    'sleet'
-  when 11 
-    'rain'
-  when 12 
-    'rain'
-  when 13 
-    'snow'
-  when 14 
-    'snow'
-  when 15 
-    'snow'
-  when 16 
-    'snow'
-  when 17 
-    'hail'
-  when 18 
-    'sleet'
-  when 19 
-    'haze'
-  when 20 
-    'fog'
-  when 21 
-    'haze'
-  when 22 
-    'haze'
-  when 23 
-    'wind'
-  when 24 
-    'wind'
-  when 25 
-    'thermometer low'
-  when 26 
-    'cloud'
-  when 27 
-    'cloud moon'
-  when 28 
-    'cloud sun'
-  when 29 
-    'cloud moon'
-  when 30 
-    'cloud sun'
-  when 31 
-    'moon'
-  when 32 
+  case weather_code.to_s
+  when /800/
     'sun'
-  when 33 
-    'moon'
-  when 34 
-    'sun'
-  when 35 
-    'hail'
-  when 36 
-    'thermometer full'
-  when 37 
-    'lightning'
-  when 38 
-    'lightning'
-  when 39 
-    'lightning'
-  when 40 
-    'rain'
-  when 41 
-    'snow'
-  when 42 
-    'snow'
-  when 43 
-    'snow'
-  when 44 
+  when /80./
     'cloud'
-  when 45 
+  when /2.*/
     'lightning'
-  when 46 
+  when /3.*/
+    'drizzle'
+  when /5.*/
+    'rain'
+  when /6.*/
     'snow'
-  when 47 
-    'lightning'
+  else
+    'sun'
   end
 end

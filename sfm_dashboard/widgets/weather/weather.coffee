@@ -7,3 +7,5 @@ class Dashing.Weather extends Dashing.Widget
     if data.climacon
       # reset classes
       $('i.climacon').attr 'class', "climacon icon-background #{data.climacon}"
+    if data.color
+      $(@node).css('background-color', data.color)
