@@ -1,15 +1,16 @@
 require 'net/http'
 
 # you can find CITY_ID here http://bulk.openweathermap.org/sample/city.list.json.gz
-CITY_ID = 12796844 # San Luis Obispo, CA
+CITY_ID = 5392323
 
 # options: metric / imperial
 UNITS   = 'metric'
 
 # create free account on open weather map to get API key
 API_KEY = ENV['WEATHER_KEY']
+print API_KEY
 
-SCHEDULER.every '10s', :first_in => 0 do |job|
+SCHEDULER.every '20s', :first_in => 0 do |job|
 
   http = Net::HTTP.new('api.openweathermap.org')
   response = http.request(Net::HTTP::Get.new("/data/2.5/weather?id=#{CITY_ID}&units=#{UNITS}&appid=#{API_KEY}"))
@@ -20,11 +21,11 @@ SCHEDULER.every '10s', :first_in => 0 do |job|
   detailed_info = weather_data['weather'].first
   current_temp  = weather_data['main']['temp'].to_f.round
 
-  send_event('weather', { :temp => "#{current_temp} &deg;#{temperature_units}",
-                          :condition => detailed_info['main'],
-                          :title => "#{weather_data['name']} Weather",
-                          :color => color_temperature(current_temp),
-                          :climacon => climacon_class(detailed_info['id'])})
+send_event('weather', {     temp: "#{current_temp} &deg;#{temperature_units}",
+                            condition: detailed_info['main'],
+                            title: "#{weather_data['name']} Weather",
+                            color: color_temperature(current_temp),
+                            climacon: climacon_class(detailed_info['id'])})
 end
 
 
