@@ -1,8 +1,8 @@
 require 'mysql2'
 
-
-# pulate the graph with some random points
-points = []
+# populate the graph with some random points
+temperatures = []
+humidities = []
 
 10.downto(1) do |i|
   # mysql connection
@@ -15,8 +15,9 @@ points = []
   results = db.query(sql)
   
   results.map do |row|
-     points << {x: row['created_at'].to_time.strftime('%s').to_i, y: row['temp_c']}
-     puts points
+    local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
+    temperatures << {x: local_time, y: row['temp_c']}
+    humidities << {x: local_time, y: row['humidity']}
   end 
 
   db.close()
@@ -24,7 +25,8 @@ end
 
 SCHEDULER.every '1h', :first_in => 0 do |job|
 
-  points.shift
+  temperatures.shift
+  humidities.shift
   
   # mysql connection
   db = Mysql2::Client.new(host: "localhost", username: "root", password: "root", database: "sfm")
@@ -39,9 +41,11 @@ SCHEDULER.every '1h', :first_in => 0 do |job|
   
   # sending to List widget, so map to :label and :value
   results.map do |row|
-	  points << {x: row['created_at'].to_time.strftime('%s').to_i, y: row['temp_c']}
-	  #puts row['created_at'].to_time.strftime('%s')
+     local_time = row['created_at'].to_time.strftime('%s').to_i - 8 * 60 * 60
+     temperatures << {x: local_time, y: row['temp_c']}
+     humidities << {x: local_time, y: row['humidity']}
   end
   
-  send_event('temperature', points: points)
+  send_event('temperature', points: temperatures)
+  send_event('humidity', points: humidities)
 end
