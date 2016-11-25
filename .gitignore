@@ -5,3 +5,5 @@
 #   git config --global core.excludesfile '~/.gitignore_global'
 
 sfm_dashboard/.env
+sfm_dashboard/log/*
+sfm_dashboard/tmp/*
