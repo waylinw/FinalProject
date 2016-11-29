@@ -7,9 +7,9 @@ import MySQLdb
 
 db = MySQLdb
 
-db = MySQLdb.connect(host="localhost",    # your host, usually localhost
-                     user="root",         # your username
-                     passwd="root",       # your password
+db = MySQLdb.connect(host="159.203.215.101",    # your host, usually localhost
+                     user="sfmuser",         # your username
+                     passwd="password",       # your password
                      db="sfm")            # name of the data base
 
 GPIO_PORT = 18
@@ -21,7 +21,7 @@ while True:
     temp_f = temp_c * 9 / 5.0 + 32
     cur.execute('''INSERT INTO Data (created_at, temp_f, temp_c, humidity) VALUES (NOW(), %s, %s, %s)''',
             (temp_f, temp_c, humidity))
-    print "Temperature: %.2f deg F (%.2f deg C), Humidity: %.2f" % (temp_f, temp_c, humidity)
+    #print "Temperature: %.2f deg F (%.2f deg C), Humidity: %.2f" % (temp_f, temp_c, humidity)
     cur.close()
     db.commit()
     time.sleep(2)
